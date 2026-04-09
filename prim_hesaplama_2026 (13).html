@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0c2461">
+<title>Prim Hesaplama 2026</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --navy:#0c2461;
+  --bg:#f0f4fb;--card:#fff;--border:#e2e8f0;
+  --text:#111827;--text2:#4b5563;--text3:#9ca3af;
+  --green-bg:#ecfdf5;--green-t:#065f46;
+  --red-bg:#fef2f2;--red-t:#991b1b;
+  --amber-bg:#fffbeb;--amber-t:#92400e;
+  --blue-bg:#eff6ff;--blue-t:#1e40af;
+  --r:14px;--rs:10px;
+}
+html{-webkit-text-size-adjust:100%}
+body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','Segoe UI',system-ui,sans-serif;min-height:100vh;background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased}
+
+/* ══ COVER ══ */
+#cover{
+  min-height:100vh;min-height:100dvh;
+  background:linear-gradient(170deg,#08194a 0%,#0c2461 50%,#0f2e7a 100%);
+  display:flex;flex-direction:column;align-items:center;justify-content:flex-start;
+  padding:env(safe-area-inset-top,24px) 20px 40px;
+  padding-top:max(env(safe-area-inset-top),24px);
+  overflow-y:auto;
+}
+#app{display:none;min-height:100vh;min-height:100dvh;display:none;flex-direction:column;}
+
+.cv-top{display:flex;flex-direction:column;align-items:center;padding-top:40px;margin-bottom:36px;}
+.cv-logo-box{background:#fff;border-radius:16px;padding:10px 24px;box-shadow:0 8px 32px rgba(0,0,0,0.22);margin-bottom:28px;}
+.cv-logo-box img{width:96px;height:30px;object-fit:contain;display:block;}
+.cv-badge{font-size:11px;font-weight:600;letter-spacing:0.16em;text-transform:uppercase;color:rgba(255,255,255,0.38);margin-bottom:10px;}
+.cv-title{font-size:28px;font-weight:700;color:#fff;text-align:center;line-height:1.2;margin-bottom:6px;}
+.cv-sub{font-size:13px;color:rgba(255,255,255,0.4);text-align:center;}
+
+.cv-section-label{font-size:11px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:rgba(255,255,255,0.32);margin-bottom:14px;text-align:left;width:100%;max-width:500px;}
+.role-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%;max-width:500px;}
+.role-card{
+  background:rgba(255,255,255,0.07);
+  border:1px solid rgba(255,255,255,0.12);
+  border-radius:16px;
+  padding:18px 14px 16px;
+  cursor:pointer;
+  display:flex;flex-direction:column;align-items:flex-start;gap:10px;
+  -webkit-tap-highlight-color:transparent;
+  transition:background .15s,transform .12s;
+  touch-action:manipulation;
+}
+.role-card:active{background:rgba(255,255,255,0.18);transform:scale(0.97);}
+.rc-icon{font-size:28px;line-height:1;}
+.rc-name{font-size:14px;font-weight:600;color:#fff;line-height:1.3;}
+.rc-desc{font-size:11px;color:rgba(255,255,255,0.38);margin-top:2px;line-height:1.4;}
+
+/* ══ HEADER ══ */
+.header{
+  background:var(--navy);
+  padding:max(env(safe-area-inset-top),16px) 16px 0;
+  padding-top:max(env(safe-area-inset-top),16px);
+  position:sticky;top:0;z-index:100;
+  box-shadow:0 1px 0 rgba(255,255,255,0.06),0 4px 16px rgba(0,0,0,0.2);
+}
+.header-row{display:flex;align-items:center;justify-content:space-between;padding-bottom:14px;}
+.header-left{display:flex;align-items:center;gap:10px;}
+.logo-wrap{width:52px;height:28px;background:#fff;border-radius:7px;display:flex;align-items:center;justify-content:center;padding:3px 5px;flex-shrink:0;}
+.logo-wrap img{width:100%;height:100%;object-fit:contain;}
+.header-title h1{font-size:15px;font-weight:600;color:#fff;letter-spacing:-0.2px;}
+.header-title p{font-size:11px;color:rgba(255,255,255,0.42);margin-top:1px;}
+.back-btn{
+  background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.15);
+  border-radius:20px;padding:7px 14px;font-size:12px;font-family:inherit;font-weight:500;
+  color:rgba(255,255,255,0.78);cursor:pointer;display:flex;align-items:center;gap:5px;
+  -webkit-tap-highlight-color:transparent;touch-action:manipulation;
+  white-space:nowrap;transition:background .15s;
+}
+.back-btn:active{background:rgba(255,255,255,0.22);}
+
+.role-tabs{display:flex;gap:2px;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;}
+.role-tabs::-webkit-scrollbar{display:none;}
+.role-tab{
+  flex-shrink:0;padding:10px 14px 11px;font-size:13px;font-family:inherit;font-weight:500;
+  color:rgba(255,255,255,0.45);background:transparent;border:none;cursor:pointer;
+  border-bottom:2.5px solid transparent;transition:color .15s,border-color .15s;
+  white-space:nowrap;-webkit-tap-highlight-color:transparent;touch-action:manipulation;
+}
+.role-tab.active{color:#fff;border-bottom-color:#60a5fa;}
+
+/* ══ CONTENT ══ */
+.content{padding:16px 14px max(env(safe-area-inset-bottom,24px),40px);max-width:600px;margin:0 auto;width:100%;}
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:16px;margin-bottom:12px;}
+.sec-title{font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:14px;}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.field-label{display:block;font-size:12px;color:var(--text2);margin-bottom:5px;font-weight:500;}
+input.ni,select{
+  width:100%;padding:12px 13px;
+  border:1px solid var(--border);border-radius:var(--rs);
+  font-size:16px;/* 16px prevents iOS zoom */
+  font-family:inherit;color:var(--text);background:#fafbfd;
+  outline:none;transition:border-color .15s;
+  -webkit-appearance:none;appearance:none;
+}
+input.ni:focus,select:focus{border-color:var(--navy);background:#fff;box-shadow:0 0 0 3px rgba(12,36,97,0.08);}
+
+/* ══ CRITERIA ══ */
+.crit-list{display:flex;flex-direction:column;gap:10px;}
+.crit-row{display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:44px;}
+.crit-name{font-size:13px;color:var(--text);font-weight:500;flex:1;min-width:0;}
+.seg{display:flex;border:1px solid var(--border);border-radius:var(--rs);overflow:hidden;flex-shrink:0;}
+.sb{
+  padding:9px 12px;font-size:12px;font-family:inherit;font-weight:600;
+  cursor:pointer;border:none;background:#f3f4f6;color:var(--text3);
+  transition:background .12s,color .12s;white-space:nowrap;
+  min-width:44px;text-align:center;
+  -webkit-tap-highlight-color:transparent;touch-action:manipulation;
+}
+.sb+.sb{border-left:1px solid var(--border);}
+.sb.s100{background:var(--green-bg);color:var(--green-t);}
+.sb.s75 {background:var(--blue-bg); color:var(--blue-t);}
+.sb.s50 {background:var(--amber-bg);color:var(--amber-t);}
+.sb.s0  {background:var(--red-bg);  color:var(--red-t);}
+
+/* ══ RESULTS ══ */
+.result-card{background:var(--navy);border-radius:var(--r);padding:18px;margin-bottom:12px;}
+.result-card .sec-title{color:rgba(255,255,255,0.38);}
+.mgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:18px;}
+.mbox{background:rgba(255,255,255,0.08);border-radius:10px;padding:12px 10px;}
+.mlb{font-size:11px;color:rgba(255,255,255,0.42);margin-bottom:4px;font-weight:500;}
+.mv{font-size:22px;font-weight:700;line-height:1.1;}
+.ms{font-size:10px;color:rgba(255,255,255,0.32);margin-top:3px;}
+.cg{color:#34d399}.ca{color:#fbbf24}.cr{color:#f87171}
+.pr{display:flex;justify-content:space-between;align-items:center;padding:11px 0;border-bottom:1px solid rgba(255,255,255,0.08);}
+.prl{font-size:13px;color:rgba(255,255,255,0.58);}
+.prv{font-size:16px;font-weight:700;color:rgba(255,255,255,0.92);}
+.prv.z{color:rgba(255,255,255,0.22);}
+.trow{display:flex;justify-content:space-between;align-items:center;padding-top:16px;margin-top:4px;border-top:1px solid rgba(255,255,255,0.14);}
+.tlb{font-size:14px;font-weight:600;color:rgba(255,255,255,0.88);}
+.tv{font-size:30px;font-weight:800;color:#fcd34d;letter-spacing:-0.5px;}
+.ftoggle{font-size:12px;color:rgba(255,255,255,0.38);background:none;border:none;cursor:pointer;padding:10px 0 0;font-family:inherit;display:flex;align-items:center;gap:4px;-webkit-tap-highlight-color:transparent;}
+.fbox{margin-top:10px;background:rgba(0,0,0,0.2);border-radius:8px;padding:12px;font-size:11px;color:rgba(255,255,255,0.48);line-height:2;font-family:'SF Mono','Fira Code',monospace;overflow-x:auto;}
+.hl{color:rgba(255,255,255,0.84);}
+.sub{font-size:10px;color:rgba(255,255,255,0.36);padding-left:10px;}
+.note{text-align:center;font-size:11px;color:var(--text3);padding:0 16px 8px;line-height:1.6;}
+
+@media(max-width:380px){
+  .role-grid{grid-template-columns:1fr 1fr;}
+  .cv-title{font-size:24px;}
+  .mgrid{grid-template-columns:1fr 1fr;}
+  .tv{font-size:24px;}
+  .sb{padding:9px 9px;font-size:11px;}
+  .grid2{grid-template-columns:1fr;}
+}
+</style>
+</head>
+<body>
+
+<!-- COVER -->
+<div id="cover">
+  <div class="cv-top">
+    <div class="cv-logo-box"><img src="data:image/png;base64,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" alt="Mavi"></div>
+    <div class="cv-badge">Performans Prim Sistemi</div>
+    <div class="cv-title">2026 Yılı<br>Prim Hesaplama</div>
+    <div class="cv-sub">Mavi Mağazacılık A.Ş.</div>
+  </div>
+  <div class="cv-section-label">Görev tanımınızı seçin</div>
+  <div class="role-grid" id="roleGrid"></div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <div class="header">
+    <div class="header-row">
+      <div class="header-left">
+        <div class="logo-wrap"><img src="data:image/png;base64,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" alt="Mavi"></div>
+        <div class="header-title">
+          <h1>Prim Hesaplama 2026</h1>
+          <p id="hRoleLbl">Mağaza Personeli</p>
+        </div>
+      </div>
+      <button class="back-btn" onclick="showCover()">&#8592; Geri</button>
+    </div>
+    <div class="role-tabs" id="roleTabs"></div>
+  </div>
+
+  <div class="content">
+    <div class="card">
+      <div class="sec-title">Mağaza verileri</div>
+      <div class="grid2">
+        <div><label class="field-label">Mağaza hedef (TL)</label><input type="text" class="ni" id="hedef" value="10.000.000" inputmode="numeric" oninput="fmtI(this)" onfocus="rawI(this)" onblur="blurI(this)"></div>
+        <div><label class="field-label">Mağaza net TL</label><input type="text" class="ni" id="net" value="10.000.000" inputmode="numeric" oninput="fmtI(this)" onfocus="rawI(this)" onblur="blurI(this)"></div>
+        <div id="icWrap"><label class="field-label">İç denetim puanı</label><input type="text" class="ni" id="icDen" value="85" inputmode="numeric" oninput="fmtI(this)" onfocus="rawI(this)" onblur="blurI(this)"></div>
+      </div>
+    </div>
+    <div class="card" id="kCard"><div class="sec-title">Kişisel veriler</div><div class="grid2" id="kGrid"></div></div>
+    <div class="card" id="opCard"><div class="sec-title">Operasyon kriterleri</div><div id="opCont"></div></div>
+    <div class="result-card">
+      <div class="sec-title">Prim özeti</div>
+      <div class="mgrid">
+        <div class="mbox"><div class="mlb">HGO%</div><div class="mv" id="rHgo">—</div><div class="ms" id="rHgoT"></div></div>
+        <div class="mbox" id="icMet"><div class="mlb">İç denetim</div><div class="mv" id="rIcM">—</div><div class="ms" id="rIcL"></div></div>
+        <div class="mbox"><div class="mlb">Satış oranı</div><div class="mv" id="rCiro" style="color:rgba(255,255,255,0.88)">—</div><div class="ms">ciro primi</div></div>
+      </div>
+      <div id="primRows"></div>
+      <div class="trow"><span class="tlb">Toplam prim</span><span class="tv" id="rTop">0,00 ₺</span></div>
+      <button class="ftoggle" onclick="toggleF()"><span id="fArr">&#9658;</span> formül detayı</button>
+      <div class="fbox" id="fBox" style="display:none"></div>
+    </div>
+    <p class="note">Prim Hesaplama Şablonu 2026 · Kesin tutar için İK ile teyit ediniz.</p>
+  </div>
+</div>
+
+<script>
+const CIRO_FLAT=0.009;
+const HGO_MM=[
+  {min:85,max:89.999,r:0.05,lb:"85–89,99%"},{min:90,max:92.499,r:0.20,lb:"90–92,49%"},
+  {min:92.5,max:94.999,r:0.25,lb:"92,5–94,99%"},{min:95,max:97.499,r:0.325,lb:"95–97,49%"},
+  {min:97.5,max:99.999,r:0.40,lb:"97,5–99,99%"},{min:100,max:102.499,r:0.50,lb:"100–102,49%"},
+  {min:102.5,max:104.999,r:0.575,lb:"102,5–104,99%"},{min:105,max:109.999,r:0.65,lb:"105–109,99%"},
+  {min:110,max:114.999,r:0.725,lb:"110–114,99%"},{min:115,max:119.999,r:0.85,lb:"115–119,99%"},
+  {min:120,max:9999,r:1.0,lb:"120%+"},
+];
+const HGO_MS=[...HGO_MM.slice(0,9),{min:115,max:9999,r:0.85,lb:"115%+"}];
+const IC_DEN=[
+  {min:0,max:59.999,m:0,lb:"< 60 puan"},{min:60,max:69.999,m:0.4,lb:"60–69 puan"},
+  {min:70,max:79.999,m:0.8,lb:"70–79 puan"},{min:80,max:89.999,m:1.0,lb:"80–89 puan"},
+  {min:90,max:999,m:1.2,lb:"90+ puan"},
+];
+const lkp=(t,v,k)=>{const r=t.find(x=>v>=x.min&&v<=x.max);return r?r[k]:0;};
+
+const ROLES=[
+  {id:"MM",label:"Mağaza Müdürü"},{id:"MS",label:"Mğz. Sorumlusu"},
+  {id:"SD",label:"Satış Danışmanı"},{id:"MAVIOLOG",label:"Maviolog"},
+  {id:"KASIYER",label:"Kasiyer"},{id:"DEPO",label:"Depo Elemanı"},
+  {id:"RUNNER",label:"Runner / Kabin"},
+];
+const RMETA={
+  MM:{icon:"🏪",desc:"Satış + Operasyon"},MS:{icon:"📋",desc:"Satış + Operasyon"},
+  SD:{icon:"👕",desc:"Satış primi"},MAVIOLOG:{icon:"✨",desc:"Satış + Görsel"},
+  KASIYER:{icon:"💳",desc:"Satış + Kartuşlu"},DEPO:{icon:"📦",desc:"Satış + Stok"},
+  RUNNER:{icon:"🔄",desc:"Satış + Stok"},
+};
+
+let role="MM",showF=false;
+const C={gorsel:1,kartuslu:1,stokTam:1,negatifStok:1,transfer:1,gizliMusteri:1,sevkiyat:1};
+
+// COVER
+function buildCover(){
+  const g=document.getElementById("roleGrid");
+  g.innerHTML="";
+  ROLES.forEach(r=>{
+    const m=RMETA[r.id]||{icon:"👤",desc:""};
+    const c=document.createElement("div");
+    c.className="role-card";
+    c.innerHTML='<div class="rc-icon">'+m.icon+'</div><div><div class="rc-name">'+r.label+'</div><div class="rc-desc">'+m.desc+'</div></div>';
+    c.onclick=function(){goToCalc(r.id);};
+    g.appendChild(c);
+  });
+}
+function goToCalc(rid){
+  role=rid;
+  document.getElementById("cover").style.display="none";
+  document.getElementById("app").style.display="flex";
+  [...document.getElementById("roleTabs").children].forEach((b,i)=>b.classList.toggle("active",ROLES[i].id===role));
+  document.getElementById("hRoleLbl").textContent=(ROLES.find(r=>r.id===role)||{label:""}).label;
+  renderForm();recalc();
+  window.scrollTo(0,0);
+}
+function showCover(){
+  document.getElementById("app").style.display="none";
+  document.getElementById("cover").style.display="flex";
+  window.scrollTo(0,0);
+}
+
+// TABS
+const tabsEl=document.getElementById("roleTabs");
+ROLES.forEach(r=>{
+  const b=document.createElement("button");
+  b.className="role-tab"+(r.id===role?" active":"");
+  b.textContent=r.label;
+  b.onclick=()=>{role=r.id;[...tabsEl.children].forEach((x,i)=>x.classList.toggle("active",ROLES[i].id===role));document.getElementById("hRoleLbl").textContent=ROLES.find(x=>x.id===role).label;renderForm();recalc();};
+  tabsEl.appendChild(b);
+});
+
+// CRITERIA
+function getCritDefs(){
+  const MM=role==="MM",MS=role==="MS",MV=role==="MAVIOLOG";
+  const KS=role==="KASIYER",DP=role==="DEPO",RN=role==="RUNNER";
+  return[
+    {key:"gorsel",label:"Görsel",show:MV||MS},
+    {key:"kartuslu",label:"Kartuşlu ciro%",show:KS||MM},
+    {key:"stokTam",label:"Stok tamamlama",show:RN||MM},
+    {key:"negatifStok",label:"Negatif stok",show:DP},
+    {key:"transfer",label:"Transfer%",show:MS},
+    {key:"gizliMusteri",label:"Gizli müşteri",show:MS||MM},
+    {key:"sevkiyat",label:"Sevkiyat açma hızı",show:MM},
+  ].filter(c=>c.show);
+}
+
+// INPUT FORMAT
+function fmtI(el){const raw=el.value.replace(/[^0-9]/g,'');const n=parseInt(raw,10);if(!isNaN(n))el.value=n.toLocaleString('tr-TR');recalc();}
+function rawI(el){const n=parseFloat(el.value.replace(/\./g,'').replace(',','.'));if(!isNaN(n))el.value=n===0?'':String(n);}
+function blurI(el){const n=parseFloat(el.value.replace(/\./g,'').replace(',','.'));el.value=(!isNaN(n)&&n>0)?n.toLocaleString('tr-TR'):'0';recalc();}
+const gv=id=>{const el=document.getElementById(id);if(!el)return 0;return parseFloat(el.value.replace(/\./g,'').replace(',','.'))||0;};
+
+// FORM RENDER
+function renderForm(){
+  const needPN=role!=="MM",needM=["MS","MM"].includes(role);
+  const kCard=document.getElementById("kCard"),kGrid=document.getElementById("kGrid");
+  if(needPN||needM){
+    kCard.style.display="";kGrid.innerHTML="";
+    if(needPN)kGrid.innerHTML+='<div><label class="field-label">Personel net TL (kişisel satış)</label><input type="text" class="ni" id="personelNet" value="1.000.000" inputmode="numeric" oninput="fmtI(this)" onfocus="rawI(this)" onblur="blurI(this)"></div>';
+    if(needM) kGrid.innerHTML+='<div><label class="field-label">Net maaş (TL)</label><input type="text" class="ni" id="maas" value="25.000" inputmode="numeric" oninput="fmtI(this)" onfocus="rawI(this)" onblur="blurI(this)"></div>';
+  }else{kCard.style.display="none";}
+  const defs=getCritDefs();
+  const opCard=document.getElementById("opCard"),opCont=document.getElementById("opCont");
+  opCard.style.display=defs.length?"":"none";opCont.innerHTML="";
+  if(!defs.length)return;
+  const list=document.createElement("div");list.className="crit-list";
+  defs.forEach(({key,label})=>{
+    const row=document.createElement("div");row.className="crit-row";
+    const nm=document.createElement("span");nm.className="crit-name";nm.textContent=label;
+    const seg=document.createElement("div");seg.className="seg";seg.id="seg_"+key;
+    row.appendChild(nm);row.appendChild(seg);list.appendChild(row);
+  });
+  opCont.appendChild(list);
+  defs.forEach(({key})=>buildSeg(key));
+}
+function buildSeg(key){
+  const seg=document.getElementById("seg_"+key);if(!seg)return;seg.innerHTML="";
+  const states=["gorsel","stokTam"].includes(key)
+    ?[[1,"%100","s100"],[0.75,"%75","s75"],[0.5,"%50","s50"],[0,"%0","s0"]]
+    :[[1,"%100","s100"],[0.5,"%50","s50"],[0,"%0","s0"]];
+  states.forEach(([val,lbl,cls])=>{
+    const b=document.createElement("button");
+    b.className="sb"+(C[key]===val?" "+cls:"");
+    b.textContent=lbl;
+    b.onclick=()=>{C[key]=val;buildSeg(key);recalc();};
+    seg.appendChild(b);
+  });
+}
+
+// HELPERS
+const fmtTL=n=>n.toLocaleString("tr-TR",{minimumFractionDigits:2,maximumFractionDigits:2})+" ₺";
+const fmtN=n=>n.toLocaleString("tr-TR",{minimumFractionDigits:0,maximumFractionDigits:0});
+const pct=v=>(v*100).toFixed(0)+"%";
+const cLbl=v=>v===1?"✓ %100":v===0.75?"~ %75":v===0.5?"~ %50":"✗ %0";
+
+// CALCULATE
+function doCalc(){
+  const hedef=gv("hedef"),net=gv("net"),icDen=gv("icDen"),personelNet=gv("personelNet"),maas=gv("maas");
+  const hgo=hedef>0?(net/hedef)*100:0;
+  const icM=lkp(IC_DEN,icDen,"m"),icLb=lkp(IC_DEN,icDen,"lb")||"—";
+  const ciroR=CIRO_FLAT;
+  let satis=0,op=0,hgoTier="",fl=[];
+  if(role==="SD"){
+    satis=personelNet*ciroR;
+    fl=[`Satış primi = <span class="hl">${fmtN(personelNet)} × ${(ciroR*100).toFixed(2)}%</span>`];
+  }else if(role==="MAVIOLOG"){
+    satis=personelNet*ciroR;op=satis*0.3*C.gorsel;
+    fl=[`Satış primi = <span class="hl">${fmtN(personelNet)} × ${(ciroR*100).toFixed(2)}%</span>`,
+        `Op. prim    = <span class="hl">Satış Prim × 30% × ${pct(C.gorsel)} (Görsel)</span>`];
+  }else if(role==="KASIYER"){
+    satis=personelNet*ciroR;op=net*0.0005*C.kartuslu;
+    fl=[`Satış primi = <span class="hl">${fmtN(personelNet)} × ${(ciroR*100).toFixed(2)}%</span>`,
+        `Op. prim    = <span class="hl">${fmtN(net)} × 0,05% × ${pct(C.kartuslu)} (Kartuşlu)</span>`];
+  }else if(role==="DEPO"){
+    satis=personelNet*ciroR;op=net*(C.negatifStok===1?0.0005:C.negatifStok===0.5?0.0004:0.0003);
+    fl=[`Satış primi = <span class="hl">${fmtN(personelNet)} × ${(ciroR*100).toFixed(2)}%</span>`,
+        `Op. prim    = <span class="hl">${fmtN(net)} × ${C.negatifStok===1?"0,05%":C.negatifStok===0.5?"0,04%":"0,03%"} (Neg. Stok)</span>`];
+  }else if(role==="RUNNER"){
+    satis=personelNet*ciroR;op=net*0.0003*C.stokTam;
+    fl=[`Satış primi = <span class="hl">${fmtN(personelNet)} × ${(ciroR*100).toFixed(2)}%</span>`,
+        `Op. prim    = <span class="hl">${fmtN(net)} × 0,03% × ${C.stokTam===1?"%100":C.stokTam===0.75?"%75":C.stokTam===0.5?"%50":"%0"} (Stok Tam.)</span>`];
+  }else if(role==="MS"){
+    satis=personelNet*ciroR*icM;
+    const opPct=C.transfer*0.35+C.gorsel*0.35+C.gizliMusteri*0.30;op=maas*opPct*icM;
+    hgoTier=lkp(HGO_MS,hgo,"lb")||"";
+    fl=[`Satış primi = <span class="hl">${fmtN(personelNet)} × ${(ciroR*100).toFixed(2)}% × ${icM.toFixed(1)}×</span>`,
+        `Op. prim    = <span class="hl">${fmtN(maas)} × ${(opPct*100).toFixed(1)}% (hgo katsayı) × ${icM.toFixed(1)}×</span>`,
+        `<span class="sub">  Transfer(×35,0%)=${cLbl(C.transfer)} · Görsel(×35,0%)=${cLbl(C.gorsel)} · Gizli Müşt.(×30%)=${cLbl(C.gizliMusteri)}</span>`];
+  }else if(role==="MM"){
+    const hgoR=lkp(HGO_MM,hgo,"r");
+    hgoTier=lkp(HGO_MM,hgo,"lb")||(hgo<85?"< 85% (prim yok)":"");
+    satis=maas*0.6*hgoR*icM;
+    const opScore=C.kartuslu*0.20+C.gizliMusteri*0.20+C.stokTam*0.30+C.sevkiyat*0.30;
+    op=maas*0.5*0.4*opScore*icM;
+    fl=[`Satış primi = <span class="hl">${fmtN(maas)} × 0.600 (satış primi payı) × ${hgoR.toFixed(3)} (hgo katsayısı) × ${icM.toFixed(1)}×</span>`,
+        `Op. prim    = <span class="hl">${fmtN(maas)} × 50% (hgo katsayısı) × 0.400 (op. katsayısı) × ${opScore.toFixed(2)} (op. skoru) × ${icM.toFixed(1)}×</span>`,
+        `<span class="sub">  KC(×0.20)=${cLbl(C.kartuslu)} · GM(×0.20)=${cLbl(C.gizliMusteri)}</span>`,
+        `<span class="sub">  ST(×0.30)=${cLbl(C.stokTam)} · SAH(×0.30)=${cLbl(C.sevkiyat)}</span>`];
+  }
+  return{hgo,icM,icLb,ciroR,satis,op,toplam:satis+op,hgoTier,fl};
+}
+
+// RENDER
+function recalc(){
+  const r=doCalc();
+  const noIC=["SD","MAVIOLOG","KASIYER","DEPO","RUNNER"].includes(role);
+  document.getElementById("icWrap").style.display=noIC?"none":"";
+  document.getElementById("icMet").style.display=noIC?"none":"";
+  const hEl=document.getElementById("rHgo");
+  hEl.textContent=r.hgo.toFixed(2)+"%";
+  hEl.className="mv "+(r.hgo>=100?"cg":r.hgo>=85?"ca":"cr");
+  document.getElementById("rHgoT").textContent=r.hgoTier||"";
+  const iEl=document.getElementById("rIcM");
+  iEl.textContent="×"+r.icM.toFixed(1);
+  iEl.className="mv "+(r.icM>=1?"cg":r.icM>0?"ca":"cr");
+  document.getElementById("rIcL").textContent=r.icLb;
+  document.getElementById("rCiro").textContent="%"+(r.ciroR*100).toFixed(2);
+  document.getElementById("primRows").innerHTML=[
+    {label:"Satış primi",val:r.satis,show:true},
+    {label:"Operasyon primi",val:r.op,show:role!=="SD"},
+  ].filter(x=>x.show).map(x=>`<div class="pr"><span class="prl">${x.label}</span><span class="prv${x.val>0?"":" z"}">${fmtTL(x.val)}</span></div>`).join("");
+  document.getElementById("rTop").textContent=fmtTL(r.toplam);
+  document.getElementById("fBox").innerHTML=r.fl.map(l=>`<div>${l}</div>`).join("");
+}
+function toggleF(){
+  showF=!showF;
+  document.getElementById("fBox").style.display=showF?"":"none";
+  document.getElementById("fArr").innerHTML=showF?"&#9660;":"&#9658;";
+}
+
+buildCover();
+</script>
+</body>
+</html>
